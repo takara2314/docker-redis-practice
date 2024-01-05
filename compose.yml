@@ -1,0 +1,25 @@
+services:
+  prod:
+    build: .
+    tty: true
+    ports:
+      - 3000:8080
+    depends_on:
+      - redis_study
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    tty: true
+    ports:
+      - 3001:8080
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis_study
+
+  redis_study:
+    image: redis:latest
+    ports:
+      - 6379:6379
