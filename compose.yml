@@ -1,9 +1,57 @@
 services:
-  prod:
+  prod1:
     build: .
     tty: true
     ports:
       - 3000:8080
+    depends_on:
+      - redis_study
+
+  prod2:
+    build: .
+    tty: true
+    ports:
+      - 3001:8080
+    depends_on:
+      - redis_study
+
+  prod3:
+    build: .
+    tty: true
+    ports:
+      - 3002:8080
+    depends_on:
+      - redis_study
+
+  prod4:
+    build: .
+    tty: true
+    ports:
+      - 3003:8080
+    depends_on:
+      - redis_study
+
+  prod5:
+    build: .
+    tty: true
+    ports:
+      - 3004:8080
+    depends_on:
+      - redis_study
+
+  prod6:
+    build: .
+    tty: true
+    ports:
+      - 3005:8080
+    depends_on:
+      - redis_study
+
+  prod7:
+    build: .
+    tty: true
+    ports:
+      - 3006:8080
     depends_on:
       - redis_study
 
@@ -13,7 +61,7 @@ services:
       dockerfile: Dockerfile.dev
     tty: true
     ports:
-      - 3001:8080
+      - 3100:8080
     volumes:
       - ./:/app
     depends_on:

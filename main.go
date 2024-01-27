@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -14,6 +15,12 @@ import (
 var (
 	rdb *redis.Client
 )
+
+type PubSubMessage struct {
+	SailNum  int
+	Athletes []string
+	Comment  string
+}
 
 func PeriodicRun(task func(...any), interval int, params ...any) {
 	for {
@@ -36,10 +43,44 @@ func statusGET(c *gin.Context) {
 		panic(err)
 	}
 
+	msg := PubSubMessage{
+		SailNum:  2314,
+		Athletes: []string{"takara", "takara2", "takara3"},
+		Comment:  "/status にGETされました",
+	}
+
+	msgByte, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
+
+	// 別のサーバーに /status されたことを連絡
+	rdb.Publish(
+		context.Background(),
+		"japan",
+		msgByte,
+	)
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": ret,
 		"status":  http.StatusOK,
 	})
+}
+
+func SubscribeMessages() {
+	ch := rdb.Subscribe(context.TODO(), "japan")
+
+	for msgStr := range ch.Channel() {
+		// fmt.Println("チャンネル名:", msg.Channel)
+		var msg PubSubMessage
+
+		err := json.Unmarshal([]byte(msgStr.Payload), &msg)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(msg)
+	}
 }
 
 func choice(s []string) string {
@@ -76,6 +117,8 @@ func main() {
 	} else {
 		fmt.Println("Redis connected")
 	}
+
+	go SubscribeMessages()
 
 	fmt.Println("setup")
 	updateStatus(&ctx)
